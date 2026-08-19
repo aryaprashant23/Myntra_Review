@@ -639,7 +639,23 @@ export default function Dashboard() {
             {/* Quick Prompt Suggestions */}
             <div style={{ padding: '0 16px 12px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               <button
-                onClick={() => handleSendMessage("Why do shoppers hesitate on wishlisted footwear?")}
+                onClick={() => handleSendMessage("Give me 5 real user experiences that create barriers from wishlist to purchase, formatted in a table with quotes, underlying themes, and impact share.")}
+                style={{
+                  background: 'rgba(255, 63, 108, 0.1)',
+                  border: '1px solid rgba(255, 63, 108, 0.3)',
+                  color: '#ff6b8b',
+                  borderRadius: 'var(--radius-full)',
+                  padding: '5px 10px',
+                  fontSize: '0.72rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                📊 5 Top Wishlist Barriers
+              </button>
+              <button
+                onClick={() => handleSendMessage("Why do shoppers hesitate on wishlisted footwear and apparel due to fit uncertainty?")}
                 style={{
                   background: 'rgba(255,255,255,0.04)',
                   border: '1px solid rgba(255,255,255,0.1)',
@@ -651,10 +667,10 @@ export default function Dashboard() {
                   transition: 'all 0.2s'
                 }}
               >
-                👠 Why footwear hesitation?
+                👠 Fit & Sizing Doubts
               </button>
               <button
-                onClick={() => handleSendMessage("What is the biggest complaint regarding price drops & sales?")}
+                onClick={() => handleSendMessage("What are the main customer complaints regarding price fluctuations and discount waiting?")}
                 style={{
                   background: 'rgba(255,255,255,0.04)',
                   border: '1px solid rgba(255,255,255,0.1)',
@@ -662,13 +678,14 @@ export default function Dashboard() {
                   borderRadius: 'var(--radius-full)',
                   padding: '5px 10px',
                   fontSize: '0.72rem',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
                 }}
               >
-                🏷️ Price drop complaints
+                🏷️ Price Drop Complaints
               </button>
               <button
-                onClick={() => handleSendMessage("Explain the pincode and delivery availability blocker.")}
+                onClick={() => handleSendMessage("How does pincode non-deliverability block wishlist conversions at final checkout?")}
                 style={{
                   background: 'rgba(255,255,255,0.04)',
                   border: '1px solid rgba(255,255,255,0.1)',
@@ -676,10 +693,11 @@ export default function Dashboard() {
                   borderRadius: 'var(--radius-full)',
                   padding: '5px 10px',
                   fontSize: '0.72rem',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
                 }}
               >
-                📦 Pincode delivery blocker
+                📦 Pincode Delivery Blocker
               </button>
             </div>
 
