@@ -2,3 +2,5 @@ google-play-scraper
 apify-client
 supabase
 python-dotenv
+groq
+requests
