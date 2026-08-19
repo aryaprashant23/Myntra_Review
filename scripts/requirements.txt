@@ -1,0 +1,4 @@
+google-play-scraper
+apify-client
+supabase
+python-dotenv

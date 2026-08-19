@@ -1,0 +1,26 @@
+{
+    "searchQueries": [
+        "myntra review",
+        "myntra problem",
+        "myntra wishlist",
+        "myntra size issue",
+        "myntra fit",
+        "myntra quality",
+        "myntra return"
+    ],
+    "subreddits": [
+        "IndianFashionAddicts",
+        "TwoXIndia",
+        "IndiaSocial",
+        "fashion"
+    ],
+    "timeFilter": "month",
+    "sort": "new",
+    "maxItems": 500,
+    "maxComments": 100,
+    "scrapeComments": true,
+    "scrapePosts": true,
+    "proxyConfiguration": {
+        "useApifyProxy": true
+    }
+}

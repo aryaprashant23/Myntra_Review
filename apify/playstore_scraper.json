@@ -1,0 +1,10 @@
+{
+    "appId": "com.myntra.android",
+    "language": "en",
+    "country": "in",
+    "sortBy": "newest",
+    "maxResults": 1000,
+    "proxyConfiguration": {
+        "useApifyProxy": true
+    }
+}
