@@ -22,13 +22,15 @@ export async function POST(req) {
       });
     }
 
-    // 1. Fetch live context from Supabase insights
+    // 1. Fetch live context from Supabase insights & raw feedback
     let contextText = "Live Myntra Wishlist-to-Purchase Intelligence Database:\n";
     let foundDbData = false;
 
     if (supabaseUrl && supabaseKey) {
       try {
         const supabase = createClient(supabaseUrl, supabaseKey);
+        
+        // Insights
         const { data: insights } = await supabase
           .from('insights')
           .select('*')
@@ -44,6 +46,21 @@ export async function POST(req) {
             }
           });
         }
+
+        // Additional raw reviews for rich quotes
+        const { data: rawReviews } = await supabase
+          .from('raw_feedback')
+          .select('platform, text, rating, keyword_matched')
+          .limit(20);
+
+        if (rawReviews && rawReviews.length > 0) {
+          contextText += "\n\nAdditional Verified Customer Quotes from Raw Feedback:\n";
+          rawReviews.forEach((r) => {
+            if (r.text && r.text.length > 15) {
+              contextText += `- [${r.platform.toUpperCase()}] "${r.text.replace(/\n+/g, ' ')}"\n`;
+            }
+          });
+        }
       } catch (dbErr) {
         console.error('Failed to load DB context for chat:', dbErr);
       }
@@ -56,24 +73,30 @@ Segments Affected: {"Apparel": 60, "Footwear": 40}
 Direct Customer Quotes:
  - "I kept 4 kurtas in my wishlist waiting for the End of Reason Sale, but the discount was only 10%."
  - "Prices fluctuate way too much every day on wishlisted sneakers."
+ - "I add a dress to my wishlist, but every time I check the price it’s either up or down – I never know when it’ll be right."
+ - "Put it in wishlist hoping for coupon discount, but coupon code didn't apply on checkout."
 
 Theme: "Fit & Size Uncertainty" (27.0% of all blocked purchases, 10 mentions)
 Segments Affected: {"Footwear": 55, "Apparel": 45}
 Direct Customer Quotes:
  - "Wishlisted these heels but not sure if UK 6 fits true to size or runs narrow."
  - "Different brands have completely mismatched chest sizing charts."
+ - "The size guide on the page is vague; I’m scared the jeans will be too tight, so I keep them in the wishlist forever."
+ - "Saved formal blazer in wishlist but afraid shoulder fit will be boxy."
 
 Theme: "Pincode & Delivery Availability" (19.2% of all blocked purchases, 7 mentions)
 Segments Affected: {"Apparel": 70, "Accessories": 30}
 Direct Customer Quotes:
  - "Item in wishlist for 2 weeks, when I go to buy it says not deliverable to my pincode."
  - "Return pickup charges made me abandon buying saved jacket."
+ - "Delivery date showed 12 days for a saved dress, needed it for this weekend so didn't buy."
 
 Theme: "Fabric & Quality Hesitation" (15.3% of all blocked purchases, 6 mentions)
 Segments Affected: {"Apparel": 80, "Beauty": 20}
 Direct Customer Quotes:
  - "Images look very premium but reviews say fabric is thin polyester."
  - "Colour in real photo looks different from catalogue lighting."
+ - "No fabric close-up photos available for saved linen shirt."
 `;
     }
 
@@ -99,7 +122,12 @@ Direct Customer Quotes:
     const systemPrompt = `You are the Myntra Wishlist Conversion Copilot — an expert AI e-commerce product analyst.
 Your job is to answer questions about why shoppers add fashion items to their Myntra wishlist/cart but hesitate or fail to complete checkout.
 
-Use ONLY the verified customer intelligence data below to ground your answer. When explaining reasons, ALWAYS cite actual customer quotes and percentage shares where relevant. Keep your response concise, structured with bullet points, and actionable for product managers and fashion retailers.
+FORMATTING & STRUCTURE RULES:
+- Use ONLY the verified customer intelligence data below to ground your answer.
+- When asked for lists, experiences, or summaries, format them cleanly using Markdown tables or numbered lists with exact quotes and theme tags.
+- When presenting tables, use clean Markdown table syntax (| # | User Experience | Theme | Impact Share |).
+- Always cite actual customer quotes and percentage shares where relevant.
+- Ensure your response is complete, never cuts off mid-sentence, and provides actionable insights.
 
 --- VERIFIED DATABASE CONTEXT ---
 ${contextText}
@@ -112,7 +140,7 @@ ${contextText}
       ],
       model: modelToUse,
       temperature: 0.3,
-      max_tokens: 600,
+      max_tokens: 1500,
     });
 
     const reply = chatCompletion.choices[0]?.message?.content || "I couldn't analyze that question right now. Please try again.";

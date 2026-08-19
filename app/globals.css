@@ -183,8 +183,51 @@ h1, h2, h3, h4, .brand-font {
   font-size: 0.92rem;
   line-height: 1.6;
   color: #e2e8f0;
-  max-width: 90%;
+  max-width: 96%;
   animation: fadeIn 0.3s ease;
+}
+
+/* Chat Markdown Tables & Elements */
+.chat-table-wrapper {
+  max-width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-sm);
+  margin: 12px 0;
+  border: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.chat-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.chat-table th {
+  background: rgba(255, 63, 108, 0.15);
+  color: #ff6b8b;
+  padding: 10px 12px;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255, 63, 108, 0.25);
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+.chat-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  line-height: 1.45;
+}
+
+.chat-table tr:last-child td {
+  border-bottom: none;
+}
+
+.chat-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .chat-bubble-user {

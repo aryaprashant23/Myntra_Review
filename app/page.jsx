@@ -29,6 +29,160 @@ const THEME_ICONS = {
   fit_uncertainty: Shirt
 };
 
+// Rich Markdown / Table / List Parser for Chat
+function FormattedChatContent({ content }) {
+  if (!content) return null;
+
+  const lines = content.split('\n');
+  const elements = [];
+  let currentTable = null;
+  let currentList = null;
+
+  const renderInline = (text) => {
+    if (!text) return text;
+    const regex = /(\*\*.*?\*\*|\*.*?\*|`.*?`)/g;
+    const parts = text.split(regex);
+
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={i} style={{ color: '#ffffff', fontWeight: '700' }}>{part.slice(2, -2)}</strong>;
+      }
+      if (part.startsWith('*') && part.endsWith('*')) {
+        return <em key={i} style={{ color: '#e2e8f0' }}>{part.slice(1, -1)}</em>;
+      }
+      if (part.startsWith('`') && part.endsWith('`')) {
+        return <code key={i} style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 5px', borderRadius: '4px', color: '#00f0ff', fontSize: '0.85em' }}>{part.slice(1, -1)}</code>;
+      }
+      return part;
+    });
+  };
+
+  const flushTable = () => {
+    if (currentTable && currentTable.length > 0) {
+      const headerRow = currentTable[0];
+      const dataRows = currentTable.slice(1).filter(row => !row.every(cell => /^[-:\s|]+$/.test(cell)));
+
+      elements.push(
+        <div key={`table-${elements.length}`} className="chat-table-wrapper">
+          <table className="chat-table">
+            <thead>
+              <tr>
+                {headerRow.map((h, hi) => (
+                  <th key={hi}>{renderInline(h.trim())}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {dataRows.map((row, ri) => (
+                <tr key={ri}>
+                  {row.map((cell, ci) => (
+                    <td key={ci}>{renderInline(cell.trim())}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+      currentTable = null;
+    }
+  };
+
+  const flushList = () => {
+    if (currentList && currentList.items.length > 0) {
+      if (currentList.type === 'ol') {
+        elements.push(
+          <ol key={`ol-${elements.length}`} style={{ paddingLeft: '20px', margin: '8px 0', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {currentList.items.map((item, ii) => (
+              <li key={ii} style={{ color: '#e2e8f0', fontSize: '0.88rem', lineHeight: '1.5' }}>{renderInline(item)}</li>
+            ))}
+          </ol>
+        );
+      } else {
+        elements.push(
+          <ul key={`ul-${elements.length}`} style={{ paddingLeft: '18px', margin: '8px 0', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {currentList.items.map((item, ii) => (
+              <li key={ii} style={{ color: '#e2e8f0', fontSize: '0.88rem', lineHeight: '1.5' }}>{renderInline(item)}</li>
+            ))}
+          </ul>
+        );
+      }
+      currentList = null;
+    }
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    // Markdown table row
+    if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+      flushList();
+      const cells = trimmed
+        .slice(1, -1)
+        .split('|')
+        .map(c => c.trim());
+      if (!currentTable) currentTable = [];
+      currentTable.push(cells);
+      continue;
+    } else {
+      flushTable();
+    }
+
+    // Bullet list
+    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+      const itemText = trimmed.slice(2);
+      if (!currentList || currentList.type !== 'ul') {
+        flushList();
+        currentList = { type: 'ul', items: [] };
+      }
+      currentList.items.push(itemText);
+      continue;
+    }
+
+    // Numbered list
+    const numMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+    if (numMatch) {
+      const itemText = numMatch[2];
+      if (!currentList || currentList.type !== 'ol') {
+        flushList();
+        currentList = { type: 'ol', items: [] };
+      }
+      currentList.items.push(itemText);
+      continue;
+    }
+
+    flushList();
+
+    if (!trimmed) {
+      elements.push(<div key={`space-${i}`} style={{ height: '6px' }} />);
+      continue;
+    }
+
+    // Headers
+    if (trimmed.startsWith('### ')) {
+      elements.push(<h4 key={`h4-${i}`} style={{ color: '#ff3f6c', fontSize: '0.95rem', fontWeight: '700', margin: '12px 0 6px' }}>{renderInline(trimmed.slice(4))}</h4>);
+      continue;
+    }
+    if (trimmed.startsWith('## ') || trimmed.startsWith('# ')) {
+      const hText = trimmed.replace(/^#+\s*/, '');
+      elements.push(<h3 key={`h3-${i}`} style={{ color: '#00f0ff', fontSize: '1.02rem', fontWeight: '700', margin: '14px 0 8px' }}>{renderInline(hText)}</h3>);
+      continue;
+    }
+
+    elements.push(
+      <p key={`p-${i}`} style={{ margin: '4px 0', lineHeight: '1.55', color: '#cbd5e1', fontSize: '0.88rem' }}>
+        {renderInline(trimmed)}
+      </p>
+    );
+  }
+
+  flushTable();
+  flushList();
+
+  return <div>{elements}</div>;
+}
+
 export default function Dashboard() {
   const [insights, setInsights] = useState([]);
   const [totalCount, setTotalCount] = useState(26);
@@ -467,7 +621,7 @@ export default function Dashboard() {
                       Groq Llama 3.3 Analyst
                     </div>
                   )}
-                  <div style={{ whiteSpace: 'pre-line' }}>{msg.content}</div>
+                  <FormattedChatContent content={msg.content} />
                 </div>
               ))}
 
