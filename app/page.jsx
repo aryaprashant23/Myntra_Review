@@ -264,11 +264,13 @@ export default function Dashboard() {
   };
 
   const sortedInsights = [...insights].sort((a, b) => {
-    if (sortBy === 'pct') return b.pct_of_total - a.pct_of_total;
-    return b.mention_count - a.mention_count;
+    if (sortBy === 'pct') return (b.pct_of_total || 0) - (a.pct_of_total || 0);
+    return (b.mention_count || 0) - (a.mention_count || 0);
   });
 
-  const topTheme = insights.length > 0 ? insights[0] : null;
+  const sortedByPct = [...insights].sort((a, b) => (b.pct_of_total || 0) - (a.pct_of_total || 0));
+  const topTheme = sortedByPct.length > 0 ? sortedByPct[0] : null;
+  const secondaryTheme = sortedByPct.length > 1 ? sortedByPct[1] : null;
 
   return (
     <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '24px 20px 60px' }}>
@@ -350,24 +352,24 @@ export default function Dashboard() {
             <TrendingUp size={16} color="#ff3f6c" />
           </div>
           <div style={{ fontSize: '1.25rem', fontWeight: '700', color: '#ffffff' }}>
-            {topTheme ? topTheme.theme_label : 'Price Drop & Discount Waiting'}
+            {topTheme ? topTheme.theme_label : 'Price Waiting & Discount Hesitation'}
           </div>
           <div style={{ fontSize: '0.78rem', color: '#ff6b8b', marginTop: '6px' }}>
-            {topTheme ? `${topTheme.pct_of_total}% of all wishlist dropouts` : '40.0% of all mentions'}
+            {topTheme ? `${topTheme.pct_of_total}% of all wishlist dropouts (${topTheme.mention_count || 0} mentions)` : '38.5% of all mentions'}
           </div>
         </div>
 
         {/* Metric 3 */}
-        <div className="glass-panel" style={{ padding: '20px' }}>
+        <div className="glass-panel" style={{ padding: '20px', borderLeft: '3px solid #9d4edd' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', fontSize: '0.82rem', marginBottom: '10px' }}>
-            <span>DROP-OFF FRICTION BOTTLENECK</span>
+            <span>SECONDARY FRICTION DRIVER</span>
             <MapPin size={16} color="#9d4edd" />
           </div>
           <div style={{ fontSize: '1.25rem', fontWeight: '700', color: '#ffffff' }}>
-            Pincode Undeliverability
+            {secondaryTheme ? secondaryTheme.theme_label : 'Fit & Size Uncertainty'}
           </div>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
-            33.3% stuck at final checkout step
+          <div style={{ fontSize: '0.78rem', color: '#c084fc', marginTop: '6px' }}>
+            {secondaryTheme ? `${secondaryTheme.pct_of_total}% of all wishlist dropouts (${secondaryTheme.mention_count || 0} mentions)` : '27.0% of all mentions'}
           </div>
         </div>
 
